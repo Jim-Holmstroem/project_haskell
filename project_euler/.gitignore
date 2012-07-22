@@ -1,4 +1,4 @@
 answer
-answer.hi
-answer.o
+*.hi
+*.o
 *.swp
