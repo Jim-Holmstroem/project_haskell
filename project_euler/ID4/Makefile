@@ -1,4 +1,4 @@
 all:
-	ghc -O answer.hs
+	ghc --make -i../ -O answer.hs
 run:
 	./answer
