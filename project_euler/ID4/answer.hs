@@ -1,9 +1,6 @@
 import Prime
 import Digit
 
-N = 999
 
-
-
-main = print $ digits 
+main = print $ digits 6546510321605406540321031
 

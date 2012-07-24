@@ -6,4 +6,6 @@ module Digit
 where
 
 digits :: Integer -> [Int]
-digits n = map (\x -> read [x] :: Int) (show n)
+digits = map (read . (:[])) . show
+--digits = map (read . return) . show
+--digits n = map (\x -> read [x] :: Int) (show n)
