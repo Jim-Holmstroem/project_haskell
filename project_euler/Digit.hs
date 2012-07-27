@@ -5,7 +5,8 @@ module Digit
 
 where
 
+import Data.Char
+
 digits :: Integer -> [Int]
-digits = map (read . (:[])) . show
---digits = map (read . return) . show
---digits n = map (\x -> read [x] :: Int) (show n)
+--digits = map (read . (:[])) . show (slower but cooler)
+digits = map digitToInt.show
