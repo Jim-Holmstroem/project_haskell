@@ -11,6 +11,6 @@ triangle = scanl1 (+) [1..]
 -- NOTE assuming the wordsum < C for all "english" words the algorithm will have complexity-of-sort(number_of_words)
 -- the map (elem) part becomes O(n^2) but the assumption above should make it lower, could use hashtable or such also
 
-trianglewordsums = (isect triangle) . ( map (head)) $  wordsums
+trianglewordsums = (isect triangle) . ( map (head)) $ wordsums
 
 main = print . sum . concat . ( map (tail) ) . (filter ((`elem` trianglewordsums).(head))) $ wordsums
