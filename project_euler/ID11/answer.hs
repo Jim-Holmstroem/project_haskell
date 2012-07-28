@@ -1,6 +1,7 @@
 
 import Listified
 import Data.List
+import Listified
 
 transformers = [id,transpose,skew,skew.transpose] -- a->a
 
@@ -10,5 +11,9 @@ grid=[[08,02,22,97,38,15,00,40,00,75,04,05,07,78,52,12,50,77,91,08],[49,49,99,40
 skew = zipWith (++) $ map (\n->take n $ repeat 1) [0..(length grid-1)]
 
 
-main = print $ map ($ grid) transformers
+slide = slidedList 4
+
+largest = {-(map (product)).-}concat.(map (slide))
+
+main = print.largest.concat.(map ($ grid)) $ transformers
 
