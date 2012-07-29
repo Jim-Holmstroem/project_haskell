@@ -1,2 +1,2 @@
 = Project Haskell
-My solved problems on project euler ({projecteuler.net}[http://www.projecteuler.net]) all written in Haskell ({haskell.org}[http://www.haskell.org]).
+My solved problems on project euler ({projecteuler.net}[http://www.projecteuler.net]) all written in the {purely-functional}[http://www.haskell.org/haskellwiki/Functional_programming] programming language Haskell ({haskell.org}[http://www.haskell.org]).
