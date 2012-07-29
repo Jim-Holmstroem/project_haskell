@@ -1,2 +1,2 @@
 = Project Haskell
-By me solved problems on project euler< {projecteuler.net}[http://www.projecteuler.net]> in Haskell.
+My solved problems on project euler ({projecteuler.net}[http://www.projecteuler.net]) all written in Haskell ({haskell.org}[http://www.haskell.org]).
