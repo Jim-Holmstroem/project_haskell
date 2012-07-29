@@ -15,5 +15,5 @@ slide = slidedList 4
 
 largest = {-(map (product)).-}concat.(map (slide))
 
-main = print.largest.concat.(map ($ grid)) $ transformers
+main = putStr.unlines.(map show).largest.concat.(map ($ grid)) $ transformers
 
