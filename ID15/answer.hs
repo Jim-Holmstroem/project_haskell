@@ -1,4 +1,11 @@
 
--- Reduce the problem to "on which line do I go down" and represent those as a binary number. We need to have atleast one place which it goes down to be able to reach the bottom and additionally it can't go down on each line since it would render the path outside the rectangle.
+-- Represnt tha path as an seqeuence of valid steps, 
+-- the manhattan distance will always be width+height and (d_1x = width,d_1y=height)
+-- example with Right=R,Down=D: RDDRRDDRRDDRRDDRRDDRRDDRRDDRRDDRRDDRRDDR
+-- The number of possible combinations with these restrictions, having a total of 40 letters of 20 each gives us the well known count 40 choose 20.
+
+import NumberTheory
+
 width = 20
-main = print $ 2^(width+1)-2
+height= 20
+main = print $ nCr (height+width) width --(or nCr (height+width) height)
