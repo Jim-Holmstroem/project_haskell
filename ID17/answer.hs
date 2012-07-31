@@ -1,12 +1,9 @@
-
 import Digit
 
 -- Using letters and then count them to get it easier to debug
 
-zero2nine    =["","one","two","three","four","five","six","seven","eight","nine"] -- you never say zero in counting except for zero
+zero2nine    =[   "",   "one",   "two",   "three",    "four",   "five",    "six",    "seven",   "eight",    "nine"] -- you never say zero in counting except for zero
 ten2nineteen =["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"]
-
-
 
 -- as a function to avoid
 tens::Int->String
@@ -27,8 +24,8 @@ andc = 3
 
 numberOfLetters::Int->String
 numberOfLetters c
-    | c == 0                        = error "zero permitted"
-    | c < 10 = zero2nine!!c -- [0..9]
+    | c == 0                        = error "zero not permitted"
+    | c < 10                        = zero2nine!!c -- [0..9]
     | 10 <= c && c < 20             = ten2nineteen!!(c-10) -- [10..19]
     | c<100 && (mod c 10)==0        = tens (div c 10) -- [20,30..90]
     | c<100 && (mod c 10)/=0        = tens (div c 10) + numberOfLetters (c - 10*(div c 10)) -- <100 (not listed above)
@@ -38,4 +35,4 @@ numberOfLetters c
 
     | otherwise                     = error "Range not implemented"
 
-main = print . sum. (map (numberOfLetters)) $ [1..1000]
+main = print . sum . (map (numberOfLetters)) $ [1..1000]
