@@ -2,7 +2,7 @@ tree = [[75],[95,64],[17,47,82],[18,35,87,10],[20,04,82,47,65],[19,01,23,75,03,3
 
 -- Dynamic programming
 
-potential_up = (\x y-> zipWith (+) x (zipWith max (tail y) (init y) )) --pushes up the potential by applying itself and the maximum below
+potential_up = (\x y-> zipWith (+) y (zipWith max (tail x) (init x) )) --pushes up the potential by applying itself and the maximum below
 
 potential_tree = scanl1 potential_up (reverse tree)
 
