@@ -2,6 +2,7 @@
 module Prime 
 ( primeFactors
 , primes
+, isPrime
 ) where 
 
 
@@ -33,3 +34,6 @@ primesTME = 2 : gaps 3 (join [[p*p,p*p+2*p..] | p <- primes'])
                     | True  = k : gaps (k+2) xs
 
 primes = primesTME
+
+isPrime = (==1).(length).(primeFactors)
+
