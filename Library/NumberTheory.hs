@@ -3,6 +3,7 @@ module NumberTheory
 ( listgcd
 , listlcm
 , nCr
+, properDivisors
 ) where
 
 -- gcd on a list
