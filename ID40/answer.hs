@@ -28,6 +28,11 @@ positions = [10^i|i<-[0..6]]
 --
 -- alignment = mod offset block
 -- block     = div offset block
+--
+--
+-- use <cell,block,alignment> to calculate the integer unider positon
+-- ex. cell=3,block=23,aligment=2 => mod 23 10^(3-1)
+-- general mod block 10^(cell-alignment) --first try, does it work?
 
 cell_size::Integer->Integer
 cell_size 1 = 9
