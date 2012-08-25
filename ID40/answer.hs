@@ -1,4 +1,6 @@
 
+import Math
+
 positions = [10^i|i<-[0..6]]
 
 -- 0.1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950
@@ -19,7 +21,6 @@ positions = [10^i|i<-[0..6]]
 -- 1010 1011 1012 1013 1014 1015 1016 1017 1018 1019
 -- .................................................
 -- 9990 9991 9992 9993 9994 9995 9996 9997 9998 9999
--- 
 --
 -- 9990 block (which of the different blocks in cell)
 -- 
@@ -29,22 +30,32 @@ positions = [10^i|i<-[0..6]]
 -- alignment = mod offset block
 -- block     = div offset block
 --
---
 -- use <cell,block,alignment> to calculate the integer unider positon
 -- ex. cell=3,block=23,aligment=2 => mod 23 10^(3-1)
 -- general mod block 10^(cell-alignment) --first try, does it work?
 
 cell_size::Integer->Integer
 cell_size 1 = 9
-cell_size n = 10*n*(10^(n-1)-1) --number of digits in cell
+cell_size cell = 10*cell*(10^(cell-1)-1) --number of digits in cell
 
 get_base_pos::Integer->Integer
 get_base_pos 1 = 1 --starts at one
-get_base_pos n = sum . ( map cell_size ) $ [1..(n-1)] --get the start position of the cell
+get_base_pos cell = sum . ( map cell_size ) $ [1..(cell-1)] --get the start position of the cell
 
 get_cell::Integer->Integer --TESTED
 get_cell 1 = 1
 get_cell n =  last . (takeWhile ((<n).(get_base_pos))) $ [1..] --gets the cell in which the digit resides
 
-main = print . (map get_cell ) $ positions
+relative_pos::Integer->Integer
+relative_pos n = head.diff $ map ($ n) [id,get_base_pos.get_cell]
+
+
+
+d::Integer->Integer
+d n = 
+    let alignment n =
+        block n =
+    in mod block (10^(cell-alignment))
+
+--main = print . (map d ) $ positions
 
