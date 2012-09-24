@@ -1,5 +1,5 @@
-= Project Haskell
-My solved problems (SPOILER ALERT!!) on project euler ({projecteuler.net}[http://www.projecteuler.net]) all written in the {purely-functional}[http://www.haskell.org/haskellwiki/Functional_programming] programming language Haskell ({haskell.org}[http://www.haskell.org]).
-== Goals
+= Project Haskell My solved problems (SPOILER ALERT!!) on project euler ({projecteuler.net}[http://www.projecteuler.net]) all written in the {purely-functional}[http://www.haskell.org/haskellwiki/Functional_programming] programming language Haskell ({haskell.org}[http://www.haskell.org]).  == Goals
 - Learn Haskell
 - Excercise solving math/programming problems
+
+
