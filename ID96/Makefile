@@ -3,4 +3,4 @@ all:
 clean:
 	rm *.o *.hi
 run:
-	./answer
+	./answer < sudoku.txt
