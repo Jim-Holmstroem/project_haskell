@@ -13,6 +13,6 @@ takenv = transpose.takenh.transpose --to ol' `transform to a known problem, solv
 --group3 = iterate somehow ?--group in one direction 
 
 numbers_left :: Sudoku Int -> Sudoku [Int]
-numbers_left sudoku = omega \\ foldl1 union $ map ($ sudoku) [takenh, takenv]
+numbers_left sudoku = foldl1 union $ map ($ sudoku) [takenh, takenv]
 
 main = print.numbers_left $ test_sudoku
