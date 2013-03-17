@@ -21,10 +21,13 @@ takenv :: Sudoku Int -> Sudoku [Int]
 takenv = transpose.takenh.transpose 
 
 --takenb :: Sudoku Int -> Sudoku [Int]
---takenb = groupby 3 rows --taken in the box
+--takenb = 
 
---group3by3 = transpose.group3.transpose.group3 --group the actual sudoku returns a 3x3x9 tensor
---group3 = iterate somehow ?--group in one direction 
+group3 :: [a] -> [[a]] -- [1,2,3,4,5,6] -> [[1,2,3],[4,5,6]]
+group3 [] = []
+group3 (a:[]) = error "len%3==1"
+group3 (a:b:[]) = error "len%3==2"
+group3 (a:b:c:xs) = [a,b,c] : group3 xs
 
 complement :: [Int] -> [Int] -- Omega\Union_i(collision_i)
 complement = (\\) omega 
@@ -42,7 +45,7 @@ collisions :: Sudoku Int -> [Sudoku [Int]]
 collisions sudoku = map ($ sudoku) [takenh, takenv]
 
 numbers_left :: Sudoku Int -> Sudoku [Int]
-numbers_left sudoku = (map2d complement).(fold2d union).collisions $ sudoku
+numbers_left = (map2d complement).(fold2d union).collisions
 
-main = print..numbers_left $ test_sudoku
+main = print.(map2d (foldl1 union)).(map group3).(map transpose).group3 $ test_sudoku
 
