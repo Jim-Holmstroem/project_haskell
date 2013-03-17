@@ -11,6 +11,7 @@ test_sudoku = [[0,0,3,0,2,0,6,0,0],[9,0,0,3,0,5,0,0,1],[0,0,1,8,0,6,4,0,0],[0,0,
 -- 008102900
 -- 700000008
 -- 006708200
+-- 002609500
 -- 800203009
 -- 005010300
 
@@ -20,8 +21,11 @@ takenh = map ((take 9).repeat.nub) -- The zero is just ignored later, change nub
 takenv :: Sudoku Int -> Sudoku [Int]
 takenv = transpose.takenh.transpose 
 
---takenb :: Sudoku Int -> Sudoku [Int]
---takenb = 
+takenb :: Sudoku Int -> Sudoku [Int]
+takenb = (replicate2d 3).(map2d (foldl1 (++))).(map group3).(map transpose).group3
+
+replicate2d :: Int -> Sudoku a -> Sudoku a
+replicate2d i = (foldl1 (++)).(map (replicate i)).(map (foldl1 (++))).(map2d (replicate i))
 
 group3 :: [a] -> [[a]] -- [1,2,3,4,5,6] -> [[1,2,3],[4,5,6]]
 group3 [] = []
@@ -42,10 +46,10 @@ fold2d :: (a -> a -> a) -> [Sudoku a] -> Sudoku a --folds sudokus
 fold2d f = foldl1 (zipWith2d f)
 
 collisions :: Sudoku Int -> [Sudoku [Int]]
-collisions sudoku = map ($ sudoku) [takenh, takenv]
+collisions sudoku = map ($ sudoku) [takenh, takenv, takenb]
 
 numbers_left :: Sudoku Int -> Sudoku [Int]
 numbers_left = (map2d complement).(fold2d union).collisions
 
-main = print.(map2d (foldl1 union)).(map group3).(map transpose).group3 $ test_sudoku
+main = print.numbers_left $ test_sudoku
 
