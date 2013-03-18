@@ -46,10 +46,24 @@ fold2d :: (a -> a -> a) -> [Sudoku a] -> Sudoku a --folds sudokus
 fold2d f = foldl1 (zipWith2d f)
 
 collisions :: Sudoku Int -> [Sudoku [Int]]
-collisions sudoku = map ($ sudoku) [takenh, takenv, takenb]
+collisions sudoku = (map ($ sudoku) [takenh, takenv, takenb])
+
+occupied :: Sudoku Int -> Sudoku Bool
+occupied = map2d (/=0)
 
 numbers_left :: Sudoku Int -> Sudoku [Int]
 numbers_left = (map2d complement).(fold2d union).collisions
 
-main = print.numbers_left $ test_sudoku
+possible :: Sudoku Int -> [Sudoku Int] 
+--returns new sudokus with all possible moves ordered by 
+--how possible they are (p \prop num_choices (a priori))
+possible
+
+solved :: Sudoku Int -> Bool
+solved = (all id).(map (all id))
+
+solve :: Sudoku Int -> Sudoku Int
+solve = (filter solved).(map solve).possible
+
+main = print.occupied $ test_sudoku
 
