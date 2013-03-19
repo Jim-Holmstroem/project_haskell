@@ -54,16 +54,23 @@ occupied = map2d (/=0)
 numbers_left :: Sudoku Int -> Sudoku [Int]
 numbers_left = (map2d complement).(fold2d union).collisions
 
-possible :: Sudoku Int -> [Sudoku Int] 
---returns new sudokus with all possible moves ordered by 
---how possible they are (p \prop num_choices (a priori))
-possible
+possiblechoices :: Sudoku [Int] -> [Sudoku Int] 
+--returns new sudokus with all possible moves (TODO ordered by 
+--how possible they are (p \prop num_choices (a priori)))
+possiblechoices = sequence.(map sequence)
 
 solved :: Sudoku Int -> Bool
-solved = (all id).(map (all id))
+solved = (all id).(map (all id)).occupied
 
-solve :: Sudoku Int -> Sudoku Int
-solve = (filter solved).(map solve).possible
+solve :: [Sudoku Int] -> [Sudoku Int]
+--start sudoku in solved sudokus out (multiple)
+solve = (filter solved).(map solve).(foldl1 (++)).(map possiblechoices) should pass and return Sudoku [Int]
 
-main = print.occupied $ test_sudoku
+elemtolist :: a -> [a] -- just a helper function to make a singleton list 
+elemtolist = (take 1).repeat
+
+initiate_solve :: Sudoku Int -> [Sudoku Int]
+initiate_solve = solve . elemtolist needs cleaning from Sudoku [Int] to Sudoku Int at returning
+
+main = print.(take 1).solve $ test_sudoku
 
