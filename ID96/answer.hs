@@ -72,5 +72,5 @@ elemtolist = (take 1).repeat
 initiate_solve :: Sudoku Int -> [Sudoku Int]
 initiate_solve = solve . elemtolist needs cleaning from Sudoku [Int] to Sudoku Int at returning
 
-main = print.(take 1).solve $ test_sudoku
+main = print.(take 1).initiate_solve $ test_sudoku
 
