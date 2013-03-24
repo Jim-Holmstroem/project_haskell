@@ -25,9 +25,6 @@ test_sudoku = [[0,0,3,0,2,0,6,0,0],[9,0,0,3,0,5,0,0,1],[0,0,1,8,0,6,4,0,0],[0,0,
 --takenb :: Sudoku Int -> Sudoku [Int]
 --takenb = (replicate2d 3).(map2d (foldl1 (++))).(map group3).(map transpose).group3
 
-repeatn :: Int -> a -> [a]
-repeatn n = (take n).repeat
-
 singeltonOrSubtraction2d :: Sudoku [Int] -> Sudoku [Int] -> Sudoku [Int]
 singeltonOrSubtraction2d reference collisions = zipWith2d singeltonOrSubtraction reference collisions
 
@@ -36,13 +33,21 @@ singeltonOrSubtraction reference collisions
     | length reference <= 1 = reference --also propagating if reference is impossible
     | otherwise = reference \\ collisions
 
-filterNonSingeltons :: [[Int]] -> [[Int]]
-filterNonSingeltons = filter ((==1).length)
+filterSingelton :: Sudoku [Int] -> Sudoku [Int] --needs to have the NonSingeltons to be [] to preserve alignment
+filterSingelton = map2d singeltonify
+    where 
+        singeltonify elem
+            | length elem == 1 = elem
+            | otherwise = []
 
 filterNonCollisionBlock :: Sudoku [Int] -> Sudoku [Int]
-filterNonCollisionBlock m = singeltonOrSubtraction2d m m
+filterNonCollisionBlock m = singeltonOrSubtraction2d m (collisions m)
+    where collisions = (replicate2d 3).(map2d (concat.(map concat))).(map group3).(map transpose).group3.filterSingelton 
+
 filterNonCollisionVertical :: Sudoku [Int] -> Sudoku [Int]
-filterNonCollisionVertical m = singeltonOrSubtraction2d m m
+filterNonCollisionVertical m = singeltonOrSubtraction2d m (collisions m)
+    where collisions = (map ((replicate 9).concat)).filterSingelton
+
 filterNonCollisionHorizontal :: Sudoku [Int] -> Sudoku [Int]
 filterNonCollisionHorizontal = transpose.filterNonCollisionVertical.transpose
 
