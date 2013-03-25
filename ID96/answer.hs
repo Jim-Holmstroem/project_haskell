@@ -1,8 +1,8 @@
 import Data.List
-import Data.List.Extras --cabal install -p list-extras
-
+import Data.Ord
 type Sudoku k = [[k]]
-omega = [1..9]
+width = 9
+omega = [1..width]
 test_sudoku :: Sudoku Int
 test_sudoku = [[0,0,3,0,2,0,6,0,0],[9,0,0,3,0,5,0,0,1],[0,0,1,8,0,6,4,0,0],[0,0,8,1,0,2,9,0,0],[7,0,0,0,0,0,0,0,8],[0,0,6,7,0,8,2,0,0],[0,0,2,6,0,9,5,0,0],[8,0,0,2,0,3,0,0,9],[0,0,5,0,1,0,3,0,0]]
 
@@ -16,14 +16,27 @@ test_sudoku = [[0,0,3,0,2,0,6,0,0],[9,0,0,3,0,5,0,0,1],[0,0,1,8,0,6,4,0,0],[0,0,
 -- 800203009
 -- 005010300
 
---takenh :: Sudoku Int -> Sudoku [Int]
---takenh = map (repeat9.nub) -- The zero is just ignored later, change nub to remove zeros
+enumerate :: [a] -> [(Int, a)]
+enumerate = zip [0..]
 
---takenv :: Sudoku Int -> Sudoku [Int]
---takenv = transpose.takenh.transpose 
+enumerate2d :: [[a]] -> [[((Int,Int), a)]]
+enumerate2d m = map ((\(row_index, row_value)->map ((\(col_index, col_value)->((row_index, col_index), col_value)).enumerate) row_value).enumerate) m
 
---takenb :: Sudoku Int -> Sudoku [Int]
---takenb = (replicate2d 3).(map2d (foldl1 (++))).(map group3).(map transpose).group3
+argmin :: Ord b => (a -> b) -> [a] -> Int
+argmin f m = (fst.(minimumBy (comparing (f.snd))).(zip [0..])) m
+
+argmin2d :: Ord b => (a -> b) -> [[a]] -> (Int, Int)
+argmin2d f m = (row_argmin, argmin f row_min)
+    where row_min = m !! row_argmin
+          row_argmin = argmin (minimum.(map f)) m
+
+fixationsSmallest :: Sudoku [Int] -> [Sudoku [Int]] --finds the smallest non-singelton list and fixate it foreach element in it 
+fixationsSmallest m = map (\fixation_elem->(map2d (fixate index_argmin fixation_elem)).enumerate2d m) value_min
+    where index_argmin@(row_argmin, col_argmin) = argmin2d length m
+          value_min = (m!!row_argmin)!!col_argmin
+          fixate index fixation_elem elem --transparent if it's not the element to fixate
+            | index == (fst elem) = [fixation_elem] 
+            | otherwise = snd elem
 
 singeltonOrSubtraction2d :: Sudoku [Int] -> Sudoku [Int] -> Sudoku [Int]
 singeltonOrSubtraction2d reference collisions = zipWith2d singeltonOrSubtraction reference collisions
@@ -46,7 +59,7 @@ filterNonCollisionBlock m = singeltonOrSubtraction2d m (collisions m)
 
 filterNonCollisionVertical :: Sudoku [Int] -> Sudoku [Int]
 filterNonCollisionVertical m = singeltonOrSubtraction2d m (collisions m)
-    where collisions = (map ((replicate 9).concat)).filterSingelton
+    where collisions = (map ((replicate width).concat)).filterSingelton
 
 filterNonCollisionHorizontal :: Sudoku [Int] -> Sudoku [Int]
 filterNonCollisionHorizontal = transpose.filterNonCollisionVertical.transpose
@@ -95,32 +108,5 @@ zipWith2d f = zipWith (zipWith f)
 fold2d :: (a -> a -> a) -> [Sudoku a] -> Sudoku a --folds sudokus
 fold2d f = foldl1 (zipWith2d f)
 
---collisions :: Sudoku Int -> [Sudoku [Int]]
---collisions sudoku = (map ($ sudoku) [takenh, takenv, takenb])
-
---occupied :: Sudoku Int -> Sudoku Bool
---occupied = map2d (/=0)
-
---numbers_left :: Sudoku Int -> Sudoku [Int]
---numbers_left = (map2d complement).(fold2d union).collisions
-
---possiblechoices :: Sudoku [Int] -> [Sudoku Int] 
---returns new sudokus with all possible moves (TODO ordered by 
---how possible they are (p \prop num_choices (a priori)))
---possiblechoices = sequence.(map sequence)
-
---solved :: Sudoku Int -> Bool
---solved = (all id).(map (all id)).occupied
-
---solve :: [Sudoku Int] -> [Sudoku Int]
---start sudoku in solved sudokus out (multiple)
---solve = (filter solved).(map solve).(foldl1 (++)).(map possiblechoices) should pass and return Sudoku [Int]
-
---elemtolist :: a -> [a] -- just a helper function to make a singleton list 
---elemtolist = (take 1).repeat
-
---initiate_solve :: Sudoku Int -> [Sudoku Int]
---initiate_solve = solve . elemtolist needs cleaning from Sudoku [Int] to Sudoku Int at returning
-
-main = print.filterNonCollision.possible $ test_sudoku
+main = print.(argmin2d length).filterNonCollision.possible $ test_sudoku
 
