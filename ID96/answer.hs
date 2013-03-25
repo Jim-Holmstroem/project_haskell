@@ -20,22 +20,24 @@ enumerate :: [a] -> [(Int, a)]
 enumerate = zip [0..]
 
 enumerate2d :: [[a]] -> [[((Int,Int), a)]]
-enumerate2d m = map ((\(row_index, row_value)->map ((\(col_index, col_value)->((row_index, col_index), col_value)).enumerate) row_value).enumerate) m
+enumerate2d = (map outer).enumerate 
+    where outer = \row@(rowIndex, rowValue)->(map (inner row)).enumerate $ rowValue
+          inner = \row@(rowIndex, rowValue) col@(colIndex, colValue) ->((rowIndex, colIndex), colValue) 
 
 argmin :: Ord b => (a -> b) -> [a] -> Int
 argmin f m = (fst.(minimumBy (comparing (f.snd))).(zip [0..])) m
 
 argmin2d :: Ord b => (a -> b) -> [[a]] -> (Int, Int)
-argmin2d f m = (row_argmin, argmin f row_min)
-    where row_min = m !! row_argmin
-          row_argmin = argmin (minimum.(map f)) m
+argmin2d f m = (rowArgmin, argmin f rowMin)
+    where rowMin = m !! rowArgmin
+          rowArgmin = argmin (minimum.(map f)) m
 
 fixationsSmallest :: Sudoku [Int] -> [Sudoku [Int]] --finds the smallest non-singelton list and fixate it foreach element in it 
-fixationsSmallest m = map (\fixation_elem->(map2d (fixate index_argmin fixation_elem)).enumerate2d m) value_min
-    where index_argmin@(row_argmin, col_argmin) = argmin2d length m
-          value_min = (m!!row_argmin)!!col_argmin
-          fixate index fixation_elem elem --transparent if it's not the element to fixate
-            | index == (fst elem) = [fixation_elem] 
+fixationsSmallest m = map (\fixationElem->(map2d (fixate indexArgmin fixationElem)).enumerate2d m) valueMin
+    where indexArgmin@(rowArgmin, colArgmin) = argmin2d length m
+          valueMin = (m!!rowArgmin)!!colArgmin
+          fixate index fixationElem elem --transparent if it's not the element to fixate
+            | index == (fst elem) = [fixationElem] 
             | otherwise = snd elem
 
 singeltonOrSubtraction2d :: Sudoku [Int] -> Sudoku [Int] -> Sudoku [Int]
