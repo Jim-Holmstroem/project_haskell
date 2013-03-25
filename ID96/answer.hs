@@ -22,10 +22,10 @@ enumerate = zip [0..]
 enumerate2d :: [[a]] -> [[((Int,Int), a)]]
 enumerate2d = (map outer).enumerate 
     where outer = \row@(rowIndex, rowValue)->(map (inner row)).enumerate $ rowValue
-          inner = \row@(rowIndex, rowValue) col@(colIndex, colValue) ->((rowIndex, colIndex), colValue) 
+          inner = \row@(rowIndex, rowValue) col@(colIndex, colValue)->((rowIndex, colIndex), colValue) 
 
 argmin :: Ord b => (a -> b) -> [a] -> Int
-argmin f m = (fst.(minimumBy (comparing (f.snd))).(zip [0..])) m
+argmin f = (fst.(minimumBy (comparing (f.snd))).(zip [0..])) 
 
 argmin2d :: Ord b => (a -> b) -> [[a]] -> (Int, Int)
 argmin2d f m = (rowArgmin, argmin f rowMin)
@@ -33,9 +33,12 @@ argmin2d f m = (rowArgmin, argmin f rowMin)
           rowArgmin = argmin (minimum.(map f)) m
 
 fixationsSmallest :: Sudoku [Int] -> [Sudoku [Int]] --finds the smallest non-singelton list and fixate it foreach element in it 
-fixationsSmallest m = map (\fixationElem->(map2d (fixate indexArgmin fixationElem)).enumerate2d m) valueMin
-    where indexArgmin@(rowArgmin, colArgmin) = argmin2d length m
+fixationsSmallest m = map (\fixationElem->(map2d (fixate indexArgmin fixationElem)).enumerate2d $ m)  valueMin
+    where indexArgmin@(rowArgmin, colArgmin) = argmin2d lengthLongerThanOne m
           valueMin = (m!!rowArgmin)!!colArgmin
+          lengthLongerThanOne elem
+            | length elem > 1 = length elem 
+            | otherwise = maxBound::Int
           fixate index fixationElem elem --transparent if it's not the element to fixate
             | index == (fst elem) = [fixationElem] 
             | otherwise = snd elem
@@ -110,5 +113,5 @@ zipWith2d f = zipWith (zipWith f)
 fold2d :: (a -> a -> a) -> [Sudoku a] -> Sudoku a --folds sudokus
 fold2d f = foldl1 (zipWith2d f)
 
-main = print.(argmin2d length).filterNonCollision.possible $ test_sudoku
+main = print.fixationsSmallest.filterNonCollision.possible $ test_sudoku
 
