@@ -106,16 +106,20 @@ filterNonCollisionVertical m = singeltonOrSubtraction2d m (collisions m)
 filterNonCollisionHorizontal :: Sudoku [Int] -> Sudoku [Int]
 filterNonCollisionHorizontal = transpose.filterNonCollisionVertical.transpose
 
+takeAtLeastOneWhile :: (a->Bool) -> [a] -> [a]
+takeAtLeastOneWhile f l = head l : takeWhile f l
+
+iterateWhileNonStationary :: (Eq a) => (a->a) -> a -> a -- f^n ( a ) until it is stationary
+iterateWhileNonStationary f a = snd.last.(takeAtLeastOneWhile (not.stationary)) $ updates
+    where updates = zip fn (tail fn) 
+          fn = iterate f a
+          stationary (last, current) = last == current
+
 filterNonCollision :: Sudoku [Int] -> Sudoku [Int]
 filterNonCollision = iterateWhileNonStationary (block.vertical.horizontal)
     where block = filterNonCollisionBlock
           vertical = filterNonCollisionVertical
           horizontal = filterNonCollisionHorizontal
-
-iterateWhileNonStationary :: (Eq a) => (a->a) -> a -> a -- f^n ( a ) until it is stationary
-iterateWhileNonStationary f a = snd.last.(takeWhile nonStationary) $ zip fn (tail fn)
-    where fn = iterate f a
-          nonStationary (last, current) = last /= current
 
 fixationsSmallest :: Sudoku [Int] -> [Sudoku [Int]] --finds the smallest non-singelton list and fixate it foreach element in it 
 fixationsSmallest m = map (\fixationElem->(map2d (fixate indexArgmin fixationElem)).enumerate2d $ m)  valueMin
@@ -141,5 +145,12 @@ solutions = postprocess.(filter solved).solve.prepare
     where prepare = filterNonCollision.possible
           postprocess = map certain
 
-main = (mapM_ print).solutions $ testSudoku
+parse :: [String] -> [Sudoku Int]
+parse [] = []
+parse (_:a:b:c:d:e:f:g:h:i:rest) = (map parseLine $ a:b:c:d:e:f:g:h:i:[]) : parse rest
+    where parseLine = map (\d->read [d]::Int) 
 
+main = do
+    contents <- getContents
+    print.(map (head.solutions)).parse.lines.cleanInput $ contents
+        where cleanInput = filter (/='\r')
