@@ -119,9 +119,10 @@ fold2d f = foldl1 (zipWith2d f)
 solve :: Sudoku [Int] -> [Sudoku [Int]]
 solve m 
     | solved m = [m]
+    | not (valid m) = []
     | otherwise = (++) (concat.(map solve).fixationsSmallest.filterNonCollision $ m) [m]
 
-main = print.(map certain).solve.possible $ testSudoku
+main = print.(map certain).(filter solved).solve.possible $ testSudoku
 
 --main = print.(map filterNonCollision).fixationsSmallest.filterNonCollision.possible $ testSudoku
 
