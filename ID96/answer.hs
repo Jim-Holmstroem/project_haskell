@@ -150,7 +150,10 @@ parse [] = []
 parse (_:a:b:c:d:e:f:g:h:i:rest) = (map parseLine $ a:b:c:d:e:f:g:h:i:[]) : parse rest
     where parseLine = map (\d->read [d]::Int) 
 
+magicNumber :: Sudoku Int -> Int
+magicNumber m = read (concat.(map show).(take 3).head $ m) ::Int
+
 main = do
     contents <- getContents
-    print.(map (head.solutions)).parse.lines.cleanInput $ contents
+    print.sum.(map magicNumber).(map (head.solutions)).parse.lines.cleanInput $ contents
         where cleanInput = filter (/='\r')
