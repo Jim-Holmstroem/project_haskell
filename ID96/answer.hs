@@ -3,8 +3,8 @@ import Data.Ord
 type Sudoku k = [[k]]
 width = 9
 omega = [1..width]
-test_sudoku :: Sudoku Int
-test_sudoku = [[0,0,3,0,2,0,6,0,0],[9,0,0,3,0,5,0,0,1],[0,0,1,8,0,6,4,0,0],[0,0,8,1,0,2,9,0,0],[7,0,0,0,0,0,0,0,8],[0,0,6,7,0,8,2,0,0],[0,0,2,6,0,9,5,0,0],[8,0,0,2,0,3,0,0,9],[0,0,5,0,1,0,3,0,0]]
+testSudoku :: Sudoku Int
+testSudoku = [[0,0,3,0,2,0,6,0,0],[9,0,0,3,0,5,0,0,1],[0,0,1,8,0,6,4,0,0],[0,0,8,1,0,2,9,0,0],[7,0,0,0,0,0,0,0,8],[0,0,6,7,0,8,2,0,0],[0,0,2,6,0,9,5,0,0],[8,0,0,2,0,3,0,0,9],[0,0,5,0,1,0,3,0,0]]
 
 -- 003020600
 -- 900305001
@@ -24,17 +24,17 @@ enumerate2d = (map outer).enumerate
     where outer = \row@(rowIndex, rowValue)->(map (inner row)).enumerate $ rowValue
           inner = \row@(rowIndex, rowValue) col@(colIndex, colValue)->((rowIndex, colIndex), colValue) 
 
-argmin :: Ord b => (a -> b) -> [a] -> Int
-argmin f = (fst.(minimumBy (comparing (f.snd))).(zip [0..])) 
+argminIndex :: Ord b => (a -> b) -> [a] -> Int --note that the domain in this case is the index-domain
+argminIndex f = fst.(minimumBy (comparing (f.snd))).(zip [0..]) 
 
-argmin2d :: Ord b => (a -> b) -> [[a]] -> (Int, Int)
-argmin2d f m = (rowArgmin, argmin f rowMin)
+argminIndex2d :: Ord b => (a -> b) -> [[a]] -> (Int, Int)
+argminIndex2d f m = (rowArgmin, argminIndex f rowMin)
     where rowMin = m !! rowArgmin
-          rowArgmin = argmin (minimum.(map f)) m
+          rowArgmin = argminIndex (minimum.(map f)) m
 
 fixationsSmallest :: Sudoku [Int] -> [Sudoku [Int]] --finds the smallest non-singelton list and fixate it foreach element in it 
 fixationsSmallest m = map (\fixationElem->(map2d (fixate indexArgmin fixationElem)).enumerate2d $ m)  valueMin
-    where indexArgmin@(rowArgmin, colArgmin) = argmin2d lengthLongerThanOne m
+    where indexArgmin@(rowArgmin, colArgmin) = argminIndex2d lengthLongerThanOne m
           valueMin = (m!!rowArgmin)!!colArgmin
           lengthLongerThanOne elem
             | length elem > 1 = length elem 
@@ -92,6 +92,9 @@ possible  = map2d possibleElement
             | elem /=0 = [elem]
             | otherwise = omega
 
+certain :: Sudoku [Int] -> Sudoku Int
+certain = map2d head 
+
 replicate2d :: Int -> Sudoku a -> Sudoku a
 replicate2d i = (foldl1 (++)).(map (replicate i)).(map (foldl1 (++))).(map2d (replicate i))
 
@@ -113,5 +116,12 @@ zipWith2d f = zipWith (zipWith f)
 fold2d :: (a -> a -> a) -> [Sudoku a] -> Sudoku a --folds sudokus
 fold2d f = foldl1 (zipWith2d f)
 
-main = print.fixationsSmallest.filterNonCollision.possible $ test_sudoku
+solve :: Sudoku [Int] -> [Sudoku [Int]]
+solve m 
+    | solved m = [m]
+    | otherwise = (++) (concat.(map solve).fixationsSmallest.filterNonCollision $ m) [m]
+
+main = print.(map certain).solve.possible $ testSudoku
+
+--main = print.(map filterNonCollision).fixationsSmallest.filterNonCollision.possible $ testSudoku
 
