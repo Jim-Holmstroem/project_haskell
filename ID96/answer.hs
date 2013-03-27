@@ -68,10 +68,12 @@ solved :: Sudoku [Int] -> Bool
 solved = fullfilled2d ((==1).length) 
 
 valid :: Sudoku [Int] -> Bool
-valid = fullfilled2d ((/=0).length) 
+valid = fullfilled2d ((/=0).length)
 
 certain :: Sudoku [Int] -> Sudoku Int
-certain = map2d head 
+certain m 
+    | solved m = map2d head m
+    | otherwise = error "certain but not.valid" 
 
 singeltonOrSubtraction2d :: Sudoku [Int] -> Sudoku [Int] -> Sudoku [Int]
 singeltonOrSubtraction2d reference collisions = zipWith2d singeltonOrSubtraction reference collisions
@@ -121,8 +123,8 @@ filterNonCollision = iterateWhileNonStationary (block.vertical.horizontal)
           vertical = filterNonCollisionVertical
           horizontal = filterNonCollisionHorizontal
 
-fixationsSmallest :: Sudoku [Int] -> [Sudoku [Int]] --finds the smallest non-singelton list and fixate it foreach element in it 
-fixationsSmallest m = map (\fixationElem->(map2d (fixate indexArgmin fixationElem)).enumerate2d $ m)  valueMin
+fixationsSmallest :: Sudoku [Int] -> [Sudoku [Int]] --finds the smallest non-singelton list and fixate it foreach element in it, only returns valid ones 
+fixationsSmallest m = validation.collisionFilter.(map (\fixationElem->(map2d (fixate indexArgmin fixationElem)).enumerate2d $ m)) $ valueMin
     where indexArgmin@(rowArgmin, colArgmin) = argminIndex2d lengthLongerThanOne m
           valueMin = (m!!rowArgmin)!!colArgmin
           lengthLongerThanOne elem
@@ -131,17 +133,17 @@ fixationsSmallest m = map (\fixationElem->(map2d (fixate indexArgmin fixationEle
           fixate index fixationElem elem --transparent if it's not the element to fixate
             | index == (fst elem) = [fixationElem] 
             | otherwise = snd elem
+          collisionFilter = map filterNonCollision
+          validation = filter valid
 
 solve :: Sudoku [Int] -> [Sudoku [Int]] --pushes valid not solved (and solved)
 solve m 
     | solved m      = [m]
-    | (not.valid) m = [ ]
-    | otherwise     =  m : possibleChoices m
-    where possibleChoices = concat.(map nextStep).fixationsSmallest.filterNonCollision
-          nextStep = solve.filterNonCollision
+    | otherwise     = (filter solved).possibleChoices $ m -- m is not solved and therefore it shouldn't be in the list
+    where possibleChoices = concat.(map solve).fixationsSmallest
 
-solutions :: Sudoku Int -> [Sudoku Int]
-solutions = postprocess.(filter solved).solve.prepare
+solutions :: Sudoku Int -> [Sudoku Int] --wrapper to solve to maintain a [Int] in the solve
+solutions = postprocess.solve.prepare
     where prepare = filterNonCollision.possible
           postprocess = map certain
 
@@ -155,5 +157,6 @@ magicNumber m = read (concat.(map show).(take 3).head $ m) ::Int
 
 main = do
     contents <- getContents
-    print.sum.(map magicNumber).(map (head.solutions)).parse.lines.cleanInput $ contents
+    (mapM_ print).(map (length.solutions)).parse.lines.cleanInput $ contents
         where cleanInput = filter (/='\r')
+
