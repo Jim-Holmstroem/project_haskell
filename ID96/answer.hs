@@ -4,29 +4,43 @@ type Sudoku k = [[k]]
 width = 9
 omega = [1..width]
 testSudoku :: Sudoku Int
-testSudoku = [[0,0,3,0,2,0,6,0,0],[9,0,0,3,0,5,0,0,1],[0,0,1,8,0,6,4,0,0],[0,0,8,1,0,2,9,0,0],[7,0,0,0,0,0,0,0,8],[0,0,6,7,0,8,2,0,0],[0,0,2,6,0,9,5,0,0],[8,0,0,2,0,3,0,0,9],[0,0,5,0,1,0,3,0,0]]
+testSudoku = [[0,0,3,0,2,0,6,0,0]
+             ,[9,0,0,3,0,5,0,0,1]
+             ,[0,0,1,8,0,6,4,0,0]
+             ,[0,0,8,1,0,2,9,0,0]
+             ,[7,0,0,0,0,0,0,0,8]
+             ,[0,0,6,7,0,8,2,0,0]
+             ,[0,0,2,6,0,9,5,0,0]
+             ,[8,0,0,2,0,3,0,0,9]
+             ,[0,0,5,0,1,0,3,0,0]]
+testSudoku2 :: Sudoku Int
+testSudoku2 = [[2,0,0,0,8,0,3,0,0]
+              ,[0,6,0,0,7,0,0,8,4]
+              ,[0,3,0,5,0,0,2,0,9]
+              ,[0,0,0,1,0,5,4,0,8]
+              ,[0,0,0,0,0,0,0,0,0]
+              ,[4,0,2,7,0,6,0,0,0]
+              ,[3,0,1,0,0,7,0,4,0]
+              ,[7,2,0,0,4,0,0,6,0]
+              ,[0,0,4,0,1,0,0,0,3]]
 
--- 003020600
--- 900305001
--- 001806400
--- 008102900
--- 700000008
--- 006708200
--- 002609500
--- 800203009
--- 005010300
+lenprint = mprint.(map2d length)
+mprint = (mapM_ print)
 
 -- [HELPERS]
 
 all2d :: Int -> [[Bool]] -> Bool
-all2d d = (all1d).(map all1d)
+all2d d = all1d.(map all1d)
     where all1d = all id
 
 fullfilled2d :: ([Int] -> Bool) -> Sudoku [Int] -> Bool
 fullfilled2d f = (all2d 2).(map2d f)
 
 replicate2d :: Int -> Sudoku a -> Sudoku a
-replicate2d i = (foldl1 (++)).(map (replicate i)).(map (foldl1 (++))).(map2d (replicate i))
+replicate2d i = (foldl1 (++))
+                .(map (replicate i))
+                .(map (foldl1 (++)))
+                .(map2d (replicate i))
 
 group3 :: [a] -> [[a]] -- [1,2,3,4,5,6] -> [[1,2,3],[4,5,6]]
 group3 [] = []
@@ -51,10 +65,13 @@ enumerate = zip [0..]
 
 enumerate2d :: [[a]] -> [[((Int,Int), a)]]
 enumerate2d = (map outer).enumerate 
-    where outer = \row@(rowIndex, rowValue)->(map (inner row)).enumerate $ rowValue
-          inner = \row@(rowIndex, rowValue) col@(colIndex, colValue)->((rowIndex, colIndex), colValue) 
+    where outer = \row@(rowIndex, rowValue)
+                ->(map (inner row)).enumerate 
+                $ rowValue
+          inner = \row@(rowIndex, rowValue) col@(colIndex, colValue)
+                ->((rowIndex, colIndex), colValue) 
 
-argminIndex :: Ord b => (a -> b) -> [a] -> Int --note that the domain in this case is the index-domain
+argminIndex :: Ord b => (a -> b) -> [a] -> Int
 argminIndex f = fst.(minimumBy (comparing (f.snd))).(zip [0..]) 
 
 argminIndex2d :: Ord b => (a -> b) -> [[a]] -> (Int, Int)
@@ -73,24 +90,26 @@ valid = fullfilled2d ((/=0).length)
 certain :: Sudoku [Int] -> Sudoku Int
 certain m 
     | solved m = map2d head m
-    | otherwise = error "certain but not.valid" 
+    | otherwise = error "certain but not.solved" 
 
 singeltonOrSubtraction2d :: Sudoku [Int] -> Sudoku [Int] -> Sudoku [Int]
-singeltonOrSubtraction2d reference collisions = zipWith2d singeltonOrSubtraction reference collisions
+singeltonOrSubtraction2d reference collisions 
+    = zipWith2d singeltonOrSubtraction reference collisions
 
 singeltonOrSubtraction :: [Int] -> [Int] -> [Int] -- a type of zipWith
 singeltonOrSubtraction reference collisions
-    | length reference <= 1 = reference --also propagating if reference is impossible
+    | length reference <= 1 = reference 
     | otherwise = reference \\ collisions
 
 possible :: Sudoku Int -> Sudoku [Int]
-possible  = map2d possibleElement 
+possible  = filterNonCollision.(map2d possibleElement)
     where 
         possibleElement elem
             | elem /=0 = [elem]
             | otherwise = omega
 
-filterSingelton :: Sudoku [Int] -> Sudoku [Int] --needs to have the NonSingeltons to be [] to preserve alignment
+filterSingelton :: Sudoku [Int] -> Sudoku [Int] 
+--needs to have the NonSingeltons to be [] to preserve alignment
 filterSingelton = map2d singeltonify
     where 
         singeltonify elem
@@ -99,7 +118,12 @@ filterSingelton = map2d singeltonify
 
 filterNonCollisionBlock :: Sudoku [Int] -> Sudoku [Int]
 filterNonCollisionBlock m = singeltonOrSubtraction2d m (collisions m)
-    where collisions = (replicate2d 3).(map2d (concat.(map concat))).(map group3).(map transpose).group3.filterSingelton 
+    where collisions = (replicate2d 3)
+                       .(map2d (concat.(map concat)))
+                       .(map group3)
+                       .(map transpose)
+                       .group3
+                       .filterSingelton 
 
 filterNonCollisionVertical :: Sudoku [Int] -> Sudoku [Int]
 filterNonCollisionVertical m = singeltonOrSubtraction2d m (collisions m)
@@ -111,8 +135,11 @@ filterNonCollisionHorizontal = transpose.filterNonCollisionVertical.transpose
 takeAtLeastOneWhile :: (a->Bool) -> [a] -> [a]
 takeAtLeastOneWhile f l = head l : takeWhile f l
 
-iterateWhileNonStationary :: (Eq a) => (a->a) -> a -> a -- f^n ( a ) until it is stationary
-iterateWhileNonStationary f a = snd.last.(takeAtLeastOneWhile (not.stationary)) $ updates
+iterateWhileNonStationary :: (Eq a) => (a->a) -> a -> a 
+-- f^n ( a ) until it is stationary
+iterateWhileNonStationary f a = snd.last
+                                .(takeAtLeastOneWhile (not.stationary)) 
+                                $ updates
     where updates = zip fn (tail fn) 
           fn = iterate f a
           stationary (last, current) = last == current
@@ -123,14 +150,21 @@ filterNonCollision = iterateWhileNonStationary (block.vertical.horizontal)
           vertical = filterNonCollisionVertical
           horizontal = filterNonCollisionHorizontal
 
-fixationsSmallest :: Sudoku [Int] -> [Sudoku [Int]] --finds the smallest non-singelton list and fixate it foreach element in it, only returns valid ones 
-fixationsSmallest m = validation.collisionFilter.(map (\fixationElem->(map2d (fixate indexArgmin fixationElem)).enumerate2d $ m)) $ valueMin
-    where indexArgmin@(rowArgmin, colArgmin) = argminIndex2d lengthLongerThanOne m
+fixationsSmallest :: Sudoku [Int] -> [Sudoku [Int]] 
+--finds the smallest non-singelton list and fixate it 
+--foreach element in it, only returns valid ones 
+fixationsSmallest m = validation.collisionFilter
+                      .(map 
+                          (\fixationElem
+                            ->(map2d (fixate indexArgmin fixationElem)
+                          )
+                      .enumerate2d $ m)) $ valueMin
+    where indexArgmin@(rowArgmin,colArgmin)=argminIndex2d lengthLongerThanOne m
           valueMin = (m!!rowArgmin)!!colArgmin
           lengthLongerThanOne elem
             | length elem > 1 = length elem 
             | otherwise = maxBound::Int
-          fixate index fixationElem elem --transparent if it's not the element to fixate
+          fixate index fixationElem elem 
             | index == (fst elem) = [fixationElem] 
             | otherwise = snd elem
           collisionFilter = map filterNonCollision
@@ -139,17 +173,18 @@ fixationsSmallest m = validation.collisionFilter.(map (\fixationElem->(map2d (fi
 solve :: Sudoku [Int] -> [Sudoku [Int]] --pushes valid not solved (and solved)
 solve m 
     | solved m      = [m]
-    | otherwise     = (filter solved).possibleChoices $ m -- m is not solved and therefore it shouldn't be in the list
+    | otherwise     = (filter solved).possibleChoices $ m 
     where possibleChoices = concat.(map solve).fixationsSmallest
 
-solutions :: Sudoku Int -> [Sudoku Int] --wrapper to solve to maintain a [Int] in the solve
-solutions = postprocess.solve.prepare
-    where prepare = filterNonCollision.possible
-          postprocess = map certain
+solutions :: Sudoku Int -> [Sudoku Int] 
+--wrapper to solve to maintain a [Int] in the solve
+solutions = postprocess.solve.possible
+    where postprocess = map certain
 
 parse :: [String] -> [Sudoku Int]
 parse [] = []
-parse (_:a:b:c:d:e:f:g:h:i:rest) = (map parseLine $ a:b:c:d:e:f:g:h:i:[]) : parse rest
+parse (_:a:b:c:d:e:f:g:h:i:rest) 
+    = (map parseLine $ a:b:c:d:e:f:g:h:i:[]) : parse rest
     where parseLine = map (\d->read [d]::Int) 
 
 magicNumber :: Sudoku Int -> Int
