@@ -213,7 +213,7 @@ filterNonCollisionHorizontal :: Sudoku [Int] -> Sudoku [Int]
 filterNonCollisionHorizontal = transpose.filterNonCollisionVertical.transpose
 
 takeAtLeastOneWhile :: (a->Bool) -> [a] -> [a]
-takeAtLeastOneWhile f l = head l : takeWhile f (tail l)
+takeAtLeastOneWhile f (headL:tailL) = headL : takeWhile f tailL
 
 iterateWhileNonStationary :: (Eq a) => (a->a) -> a -> a 
 -- f^n ( a ) until it is stationary
