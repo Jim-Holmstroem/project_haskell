@@ -26,7 +26,7 @@ innerProd a b = sum $ zipWith (*) a b
 --numSolutions = length.filter ((==total).(innerProd values)).productN $ bounds values
 
 --ignore the 1-ones and just add those to get to ``total''
-numSolutions = length.filter ((<=total).innerProd (tail values)).productN $ bounds (tail values)
+numSolutions = length.filter ((<=total).innerProd (values\\[1])).productN $ bounds (values\\[1])
 
 
 main = print numSolutions
