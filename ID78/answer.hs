@@ -1,60 +1,46 @@
+import Debug.Trace
 
+innerTrace :: (Show a) => [Char] -> a -> a
+--innerTrace message a = a 
+innerTrace message a = trace (message ++ ":" ++ show a) a 
 
 p :: Int -> Int
 p 0 = 0
 p 1 = 1
 p 2 = 2
 p 3 = 3
-p 4 = 6
+p 4 = 5
 p 5 = 7
-
---p 0
-
---p 1
---0 -- p 0
-
---p 2
---00 -- p 0
---0 0 -- p 1
-
---p 3
---000 -- p 0
---00 0 -- p 1
---0  0 0 -- p 2 (all except last is a collision)
-
---p 4
---0000 -- p 0
---000 0 -- p 1
---00  00 -- p 2
---00  0 0
---0   0 0 0 -- p 3 (all except last is a collision)
-
---p 5
---00000 -- p 0
---0000 0 -- p 1
---000  00 -- p 2
---000  0 0
---00   00 0 -- p 3 (00 000 already exists)
---00   0 0 0
---0    0 0 0 0 -- p 4 (all except last is a collision)
-
---p 6
---000000 -- p 0
---00000 0 -- p 1
---0000  00 -- p 2
---0000  0 0
---000   000 -- p 3
---000   00 0
---000   0 0 0
---00    00 00 -- p 4 (a few configurations already exists)
---00    00 0 0
---00    0 0 0 0
---0     0 0 0 0 0 -- p 5 (all except last is a collision)
+p n = sum.(map (pk n)) $ [1..n] --sum up all the partitions with [1..n] parts
 
 --Should be possible with dynamic programming, since after choosing the first
 --split we have a smaller subproblem already calculated.
+--
+--The problem can be reformulated as counting the possible partitions of an integer n
+--
 
---Only the size of the piles defines the pile configuration
---thus one can sort the size of the piles
+pk :: Int -> Int -> Int
+--partition of n with k parts
+--assumes ``and [n>=0,k>=0]''
+pk 0 0 = 1
+pk _ 1 = 1
+pk n k
+    | n==k                  = 1
+    | k>n                   = error ("k>n:"++(show k)++" "++(show n))
+    | otherwise             =
+         ( innerTrace "pk1" $ 
+            pk (
+                innerTrace "    n=n-1" (n-1)
+            ) (
+                innerTrace "    k=k-1" (k-1)
+            )
+         ) + 
+         ( innerTrace "pk2" $
+            pk (
+                innerTrace "    n=n-k" (n-k)
+            ) (
+                innerTrace "    k=k" (k)
+            )
+         )
 
 main = putStr $ "Hello Haskell\n"
