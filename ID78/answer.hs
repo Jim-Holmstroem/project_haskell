@@ -1,11 +1,13 @@
 import Debug.Trace
+import Control.Parallel
+import Control.Parallel.Strategies
 
 innerTrace :: (Show a) => [Char] -> a -> a
 --innerTrace message a = a 
 innerTrace message a = trace (message ++ ":" ++ show a) a 
 
 p :: Int -> Int
-p 0 = 0
+p 0 = 1
 p 1 = 1
 p 2 = 2
 p 3 = 3
@@ -24,23 +26,10 @@ pk :: Int -> Int -> Int
 --assumes ``and [n>=0,k>=0]''
 pk 0 0 = 1
 pk _ 1 = 1
-pk n k
+pk n k -- n,k>=2
     | n==k                  = 1
-    | k>n                   = error ("k>n:"++(show k)++" "++(show n))
-    | otherwise             =
-         ( innerTrace "pk1" $ 
-            pk (
-                innerTrace "    n=n-1" (n-1)
-            ) (
-                innerTrace "    k=k-1" (k-1)
-            )
-         ) + 
-         ( innerTrace "pk2" $
-            pk (
-                innerTrace "    n=n-k" (n-k)
-            ) (
-                innerTrace "    k=k" (k)
-            )
-         )
+    | k>n                   = 0 -- zero ways to partion into more than actual parts
+    | otherwise             = ( pk (n-1) (k-1) ) + ( pk (n-k) k )
+--Haskell => Memoized => Dynamic programming
 
-main = putStr $ "Hello Haskell\n"
+main = (mapM_ print) $ map p $ [1..100]
