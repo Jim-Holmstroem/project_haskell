@@ -21,6 +21,13 @@ p n = sum.(map (pk n)) $ [1..n] --sum up all the partitions with [1..n] parts
 --Thought 1: rewrite p(n) using the recurrence for p_k(n)
 --
 
+
+--
+-- Use the direct recurrent relation of p (and see if this is faster)
+-- http://mathworld.wolfram.com/PartitionFunctionP.html (20)
+--
+
+
 penta :: Int64 -> Int64
 penta n = div (n*(3*n-1)) 2
 
