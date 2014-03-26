@@ -34,7 +34,7 @@ n_splits n = n_splits_up_to_k n n
 
 
 condition :: Int -> Bool
-condition = (>5000) . n_splits
+condition = (>5000)
 
 
 --debug = (mapM (\x->print (x,n_splits x))) $ [1..]
@@ -42,4 +42,4 @@ condition = (>5000) . n_splits
 
 
 main :: IO ()
-main = print . head . filter condition $ [2..]
+main = print . head . filter (condition . n_splits) $ [2..]

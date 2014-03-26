@@ -1,3 +1,5 @@
+import Data.Function.Memoize (memoize2)
+
 -- same basic idea as ID77
 
 -- Number of splits with maximum of k summing up to n
@@ -6,7 +8,7 @@ n_splits_up_to_k n k
     | n < 0 = 0
     | n == 0 = 1
     | otherwise = sum . map (subsplit n) $ [1..k]
-        where subsplit n ki = n_splits_up_to_k (n - ki) ki
+        where subsplit n ki = (memoize2 n_splits_up_to_k) (n - ki) ki
 
 
 -- Number of splits of n

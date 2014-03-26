@@ -1,5 +1,5 @@
 all:
-	ghc --make -i../Library/ -O answer.hs
+	ghc --make -i../Library/ -O2 answer.hs
 clean:
 	rm -f *.o *.hi
 run:
