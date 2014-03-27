@@ -3,7 +3,11 @@ module Prime
 ( primeFactors
 , primes
 , isPrime
+, euler
 ) where
+
+import Data.List (groupBy)
+
 
 primeFactors :: Int -> [Int]
 primeFactors n = factor primes n
@@ -20,6 +24,13 @@ union (x:xs) (y:ys) = case (compare x y) of
            LT -> x : union  xs  (y:ys)
            EQ -> x : union  xs     ys
            GT -> y : union (x:xs)  ys
+
+runLengthEncoding = map (\ps -> (head ps, length ps)) . groupBy (==)
+
+-- eulers product formulae and euler(p^k) = p^(k-1)(p-1)
+euler 1 = 1
+euler n = product . map euler_pk . runLengthEncoding . primeFactors $ n
+    where euler_pk (p, k) = p ^ (k - 1) * (p - 1)
 
 {-# OPTIONS_GHC -O2 -fno-cse #-}
 -- tree-merging Eratosthenes sieve
